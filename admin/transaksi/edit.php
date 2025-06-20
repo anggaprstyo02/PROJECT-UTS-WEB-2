@@ -2,37 +2,52 @@
 include '../config/koneksi.php';
 
 // Ambil ID transaksi dari URL
-$id = $_GET['id'];
+$id = $_GET['id'] ?? null;
 
-// Query untuk mengambil data transaksi berdasarkan ID
+// Ambil data transaksi berdasarkan ID
 $query = $koneksi->query("SELECT * FROM transaksi WHERE id = '$id'");
 $transaksi = $query->fetch_assoc();
 
-// Jika tidak ada transaksi dengan ID tersebut, redirect ke halaman index
+// Redirect jika data tidak ditemukan
 if (!$transaksi) {
     echo "<script>location='index.php';</script>";
     exit();
 }
 
-?>
+// Ambil semua data kendaraan sekaligus jenis dan biaya
+$kendaraanData = [];
+$kendaraanOptions = '';
+$kendaraan = $koneksi->query("SELECT k.id, k.nopol, k.merk, j.biaya FROM kendaraan k JOIN jenis j ON k.jenis_id = j.id ORDER BY k.nopol ASC");
+while ($k = $kendaraan->fetch_assoc()) {
+    $selected = ($k['id'] == $transaksi['kendaraan_id']) ? 'selected' : '';
+    $kendaraanData[$k['id']] = $k['biaya'];
+    $kendaraanOptions .= "<option value='{$k['id']}' $selected>{$k['nopol']} - {$k['merk']}</option>";
+}
 
+// Ambil semua data area parkir
+$areaOptions = '';
+$area = $koneksi->query("SELECT * FROM area_parkir ORDER BY nama ASC");
+while ($a = $area->fetch_assoc()) {
+    $selected = ($a['id'] == $transaksi['area_parkir_id']) ? 'selected' : '';
+    $areaOptions .= "<option value='{$a['id']}' $selected>{$a['nama']}</option>";
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Edit Transaksi</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>Edit Transaksi Parkir</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     body { background-color: #f1f4f9; min-height: 100vh; padding-bottom: 80px; }
     .sidebar { width: 250px; min-height: 100vh; background-color: #212529; position: fixed; color: #fff; }
     .sidebar h4 { font-weight: bold; }
     .sidebar a { color: #adb5bd; display: block; padding: 14px 20px; text-decoration: none; }
     .sidebar a:hover, .sidebar a.active { background-color: #495057; color: #fff; }
-    .navbar { margin-left: 250px; }
     .content { margin-left: 250px; padding: 40px 30px; }
-    .card { border-radius: 12px; }
+    .navbar { margin-left: 250px; }
     footer { position: fixed; bottom: 0; left: 250px; right: 0; background-color: #212529; color: #fff; text-align: center; padding: 16px 0; font-size: 0.9rem; }
   </style>
 </head>
@@ -56,14 +71,15 @@ if (!$transaksi) {
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow">
   <div class="container-fluid">
-    <span class="navbar-brand">Edit Transaksi</span>
+    <span class="navbar-brand">Edit Transaksi Parkir</span>
   </div>
 </nav>
 
 <!-- Content -->
 <div class="content">
+  <h2 class="fw-bold mb-4">Edit Data Transaksi</h2>
+
   <div class="card shadow-sm p-4">
-    <h4 class="mb-4 fw-bold">Form Edit Transaksi</h4>
     <form method="post">
       <div class="mb-3">
         <label class="form-label">Tanggal</label>
@@ -79,45 +95,28 @@ if (!$transaksi) {
       </div>
       <div class="mb-3">
         <label class="form-label">Keterangan</label>
-        <input type="text" name="keterangan" class="form-control" value="<?= $transaksi['keterangan'] ?>">
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Biaya</label>
-        <input type="number" name="biaya" id="biaya" class="form-control" value="<?= $transaksi['biaya'] ?>" readonly>
+        <input type="text" name="keterangan" class="form-control" value="<?= $transaksi['keterangan'] ?>" required>
       </div>
       <div class="mb-3">
         <label class="form-label">Kendaraan</label>
-        <select name="kendaraan_id" id="kendaraan_id" class="form-select" required>
+        <select name="kendaraan_id" class="form-select" id="kendaraanSelect" required>
           <option value="">-- Pilih Kendaraan --</option>
-          <?php
-          $kendaraan = $koneksi->query("SELECT * FROM kendaraan");
-          while ($k = $kendaraan->fetch_assoc()) {
-              $selected = ($k['id'] == $transaksi['kendaraan_id']) ? 'selected' : '';
-              $jenis_kendaraan_id = $k['jenis_kendaraan_id'];
-              $jenis = $koneksi->query("SELECT biaya FROM jenis WHERE id = '$jenis_kendaraan_id'");
-              $biaya = $jenis->fetch_assoc()['biaya'];
-              echo "<option value='{$k['id']}' data-biaya='{$biaya}' $selected>{$k['nopol']} - {$k['merk']}</option>";
-          }
-          ?>
+          <?= $kendaraanOptions ?>
         </select>
       </div>
-      <div class="mb-4">
+      <div class="mb-3">
+        <label class="form-label">Biaya Parkir</label>
+        <input type="text" id="biayaParkir" name="biaya" class="form-control" readonly value="Rp <?= number_format($transaksi['biaya'], 0, ',', '.') ?>">
+      </div>
+      <div class="mb-3">
         <label class="form-label">Area Parkir</label>
         <select name="area_parkir_id" class="form-select" required>
           <option value="">-- Pilih Area --</option>
-          <?php
-          $area = $koneksi->query("SELECT * FROM area_parkir");
-          while ($a = $area->fetch_assoc()) {
-              $selected = ($a['id'] == $transaksi['area_parkir_id']) ? 'selected' : '';
-              echo "<option value='{$a['id']}' $selected>{$a['nama']}</option>";
-          }
-          ?>
+          <?= $areaOptions ?>
         </select>
       </div>
-      <div class="d-flex justify-content-between">
-        <a href="index.php" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Kembali</a>
-        <button class="btn btn-primary" name="update"><i class="fas fa-save me-2"></i>Update</button>
-      </div>
+      <button class="btn btn-success" name="update"><i class="fas fa-save me-2"></i>Update</button>
+      <a href="index.php" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Kembali</a>
     </form>
 
     <?php
@@ -126,16 +125,27 @@ if (!$transaksi) {
         $mulai = $_POST['mulai'];
         $akhir = $_POST['akhir'];
         $keterangan = $_POST['keterangan'];
-        $biaya = $_POST['biaya'];
         $kendaraan_id = $_POST['kendaraan_id'];
         $area_parkir_id = $_POST['area_parkir_id'];
+        $biaya = isset($kendaraanData[$kendaraan_id]) ? $kendaraanData[$kendaraan_id] : 0;
 
-        // Update data transaksi di database
-        $koneksi->query("UPDATE transaksi SET tanggal = '$tanggal', mulai = '$mulai', akhir = '$akhir', 
-                        keterangan = '$keterangan', biaya = '$biaya', kendaraan_id = '$kendaraan_id', 
-                        area_parkir_id = '$area_parkir_id' WHERE id = '$id'");
+        $queryUpdate = "
+            UPDATE transaksi SET 
+              tanggal = '$tanggal', 
+              mulai = '$mulai', 
+              akhir = '$akhir', 
+              keterangan = '$keterangan', 
+              biaya = $biaya, 
+              area_parkir_id = $area_parkir_id, 
+              kendaraan_id = $kendaraan_id
+            WHERE id = $id
+        ";
 
-        echo "<script>location='index.php';</script>";
+        if ($koneksi->query($queryUpdate)) {
+            echo "<script>location='index.php';</script>";
+        } else {
+            echo "<div class='alert alert-danger mt-3'>Gagal memperbarui data: " . $koneksi->error . "</div>";
+        }
     }
     ?>
   </div>
@@ -148,15 +158,16 @@ if (!$transaksi) {
   </div>
 </footer>
 
-<!-- JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-document.getElementById('kendaraan_id').addEventListener('change', function () {
-  const selectedOption = this.options[this.selectedIndex];
-  const biaya = selectedOption.getAttribute('data-biaya');
-  document.getElementById('biaya').value = biaya || 0;
+// Data biaya kendaraan dari PHP
+const biayaMap = <?php echo json_encode($kendaraanData); ?>;
+
+document.getElementById('kendaraanSelect').addEventListener('change', function () {
+  const selectedId = this.value;
+  const biaya = biayaMap[selectedId] || 0;
+  document.getElementById('biayaParkir').value = 'Rp ' + biaya.toLocaleString('id-ID');
 });
 </script>
-
 </body>
 </html>

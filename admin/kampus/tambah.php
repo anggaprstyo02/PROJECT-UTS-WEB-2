@@ -103,7 +103,8 @@
         <label for="longitude" class="form-label">Longitude</label>
         <input type="text" name="longitude" id="longitude" class="form-control" required>
       </div>
-      <button type="submit" class="btn btn-primary" name="simpan"><i class="fas fa-save me-2"></i>Simpan</button>
+      <button class="btn btn-success" name="simpan"><i class="fas fa-save me-2"></i>Simpan</button>
+      <a href="index.php" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Kembali</a>
     </form>
 
     <?php

@@ -1,6 +1,6 @@
 <?php
 // Koneksi ke database
-$koneksi = mysqli_connect("localhost", "root", "", "db_parkir_kampus");
+$koneksi = mysqli_connect("localhost", "root", "", "dbparkir");
 if (!$koneksi) {
     die("Koneksi gagal: " . mysqli_connect_error());
 }
@@ -36,8 +36,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id_pengunjung = mysqli_insert_id($koneksi);
 
     // Simpan ke tabel kendaraan (menggunakan pemilik_id)
-    $sql_kendaraan = "INSERT INTO kendaraan (nopol, merk, pemilik_id, jenis_kendaraan_id, pengunjung_id, thn_beli) 
-                      VALUES ('$plat', '$merk', '$id_pengunjung', '$jenis_kendaraan_id', '$id_pengunjung', '$tahun_beli')";
+    $sql_kendaraan = "INSERT INTO kendaraan (nopol, merk, pemilik_id, jenis_id, pengunjung_id, thn_beli) 
+                    VALUES ('$plat', '$merk', '$id_pengunjung', '$jenis_kendaraan_id', '$id_pengunjung', '$tahun_beli')";
     mysqli_query($koneksi, $sql_kendaraan);
     $id_kendaraan = mysqli_insert_id($koneksi);
 
@@ -152,7 +152,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <select class="form-select" id="areaParkir" name="areaParkir" required>
                             <option value="" disabled selected>Pilih Area</option>
                             <?php
-                            $area_result = mysqli_query($koneksi, "SELECT id, nama FROM area_parkir WHERE kampus_id = 2");
+                            $area_result = mysqli_query($koneksi, "SELECT id, nama FROM area_parkir WHERE kampus_id = 4");
                             while ($area = mysqli_fetch_assoc($area_result)) {
                                 echo "<option value='{$area['id']}'>{$area['nama']}</option>";
                             }

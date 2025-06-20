@@ -7,9 +7,7 @@ include '../config/koneksi.php';
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Data Kendaraan</title>
-  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body {
@@ -56,9 +54,6 @@ include '../config/koneksi.php';
     .card {
       border: none;
       border-radius: 12px;
-    }
-    .badge-kampus {
-      font-size: 0.85rem;
     }
     footer {
       position: fixed;
@@ -118,20 +113,19 @@ include '../config/koneksi.php';
         </thead>
         <tbody>
           <?php
-          // Query untuk mendapatkan data kendaraan, jenis kendaraan, dan nama pemilik
-          $query = "SELECT k.*, j.nama AS jenis_nama, p.nama AS pemilik_nama
+          // ✅ Query diperbaiki agar pakai pengunjung_id
+          $query = "SELECT k.*, j.nama AS jenis_nama, p.nama AS pengunjung_nama
                     FROM kendaraan k
-                    JOIN jenis j ON k.jenis_kendaraan_id = j.id
-                    JOIN pengunjung p ON k.pemilik_id = p.id";  // Menghubungkan dengan tabel pengunjung
+                    JOIN jenis j ON k.jenis_id = j.id
+                    JOIN pengunjung p ON k.pengunjung_id = p.id";
           $result = $koneksi->query($query);
           
-          // Jika ada data
           if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
               echo "<tr>
                   <td class='text-center'>{$row['id']}</td>
                   <td>{$row['merk']}</td>
-                  <td>{$row['pemilik_nama']}</td>  <!-- Menampilkan nama pemilik -->
+                  <td>{$row['pengunjung_nama']}</td>
                   <td>{$row['nopol']}</td>
                   <td class='text-center'>{$row['thn_beli']}</td>
                   <td>{$row['jenis_nama']}</td>
@@ -158,7 +152,6 @@ include '../config/koneksi.php';
   </div>
 </footer>
 
-<!-- JS Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -97,8 +97,16 @@ $data = $koneksi->query("SELECT * FROM kendaraan WHERE id=$id")->fetch_assoc();
         <input type="text" name="merk" class="form-control" value="<?= $data['merk'] ?>" required>
       </div>
       <div class="mb-3">
-        <label class="form-label">Pemilik</label>
-        <input type="text" name="pemilik" class="form-control" value="<?= $data['pemilik'] ?>" required>
+        <label class="form-label">Pemilik (Pengunjung)</label>
+        <select name="pengunjung_id" class="form-select" required>
+          <?php
+          $pengunjung = $koneksi->query("SELECT * FROM pengunjung");
+          while ($p = $pengunjung->fetch_assoc()) {
+              $selected = ($p['id'] == $data['pengunjung_id']) ? 'selected' : '';
+              echo "<option value='{$p['id']}' $selected>{$p['nama']}</option>";
+          }
+          ?>
+          </select>
       </div>
       <div class="mb-3">
         <label class="form-label">Nomor Polisi</label>
@@ -114,11 +122,11 @@ $data = $koneksi->query("SELECT * FROM kendaraan WHERE id=$id")->fetch_assoc();
       </div>
       <div class="mb-3">
         <label class="form-label">Jenis Kendaraan</label>
-        <select name="jenis_kendaraan_id" class="form-select" required>
+        <select name="jenis_id" class="form-select" required>
           <?php
           $jenis = $koneksi->query("SELECT * FROM jenis");
           while ($j = $jenis->fetch_assoc()) {
-              $selected = ($j['id'] == $data['jenis_kendaraan_id']) ? 'selected' : '';
+              $selected = ($j['id'] == $data['jenis_id']) ? 'selected' : '';
               echo "<option value='{$j['id']}' $selected>{$j['nama']}</option>";
           }
           ?>
@@ -131,19 +139,19 @@ $data = $koneksi->query("SELECT * FROM kendaraan WHERE id=$id")->fetch_assoc();
     <?php
     if (isset($_POST['update'])) {
         $merk = $_POST['merk'];
-        $pemilik = $_POST['pemilik'];
+        $pengunjung_id = $_POST['pengunjung_id'];
         $nopol = $_POST['nopol'];
         $thn_beli = $_POST['thn_beli'];
         $deskripsi = $_POST['deskripsi'];
-        $jenis_kendaraan_id = $_POST['jenis_kendaraan_id'];
+        $jenis_id = $_POST['jenis_id'];
 
         $koneksi->query("UPDATE kendaraan SET 
                             merk='$merk', 
-                            pemilik='$pemilik', 
+                            pengunjung_id='$pengunjung_id', 
                             nopol='$nopol', 
                             thn_beli='$thn_beli', 
                             deskripsi='$deskripsi', 
-                            jenis_kendaraan_id='$jenis_kendaraan_id'
+                            jenis_id='$jenis_id'
                          WHERE id=$id");
         echo "<script>location='index.php';</script>";
     }

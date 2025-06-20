@@ -106,7 +106,7 @@
             <th>Tanggal</th>
             <th>Mulai</th>
             <th>Akhir</th>
-            <th>Kendaraan</th>
+            <th>Kendaraan</th> <!-- nopol dan merk -->
             <th>Area Parkir</th>
             <th>Biaya</th>
             <th>Aksi</th>
@@ -114,7 +114,7 @@
         </thead>
         <tbody>
           <?php
-          $query = "SELECT t.*, k.nopol, a.nama AS area 
+          $query = "SELECT t.*, k.nopol, k.merk, a.nama AS area 
                     FROM transaksi t 
                     JOIN kendaraan k ON t.kendaraan_id = k.id 
                     JOIN area_parkir a ON t.area_parkir_id = a.id";
@@ -126,7 +126,7 @@
                   <td class='text-center'>" . htmlspecialchars($row['tanggal']) . "</td>
                   <td class='text-center'>" . htmlspecialchars($row['mulai']) . "</td>
                   <td class='text-center'>" . htmlspecialchars($row['akhir']) . "</td>
-                  <td class='text-center'>" . htmlspecialchars($row['nopol']) . "</td>
+                  <td class='text-center'>" . htmlspecialchars($row['nopol']) . " - " . htmlspecialchars($row['merk']) . "</td>
                   <td class='text-center'>" . htmlspecialchars($row['area']) . "</td>
                   <td class='text-center'>Rp " . number_format($row['biaya'], 0, ',', '.') . "</td>
                   <td class='text-center'>

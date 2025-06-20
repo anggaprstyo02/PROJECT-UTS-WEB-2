@@ -21,15 +21,11 @@
       position: fixed;
       color: #fff;
     }
-    .sidebar h4 {
-      font-weight: bold;
-    }
     .sidebar a {
       color: #adb5bd;
       display: block;
       padding: 14px 20px;
       text-decoration: none;
-      transition: all 0.2s;
     }
     .sidebar a:hover, .sidebar a.active {
       background-color: #495057;
@@ -38,7 +34,6 @@
     .content {
       margin-left: 250px;
       padding: 40px 30px;
-      padding-bottom: 100px;
     }
     .navbar {
       margin-left: 250px;
@@ -53,7 +48,6 @@
       text-align: center;
       padding: 16px 0;
       font-size: 0.9rem;
-      z-index: 1;
     }
   </style>
 </head>
@@ -86,6 +80,28 @@
   <h2 class="fw-bold mb-4">Tambah Kendaraan</h2>
 
   <div class="card shadow-sm p-4">
+    <?php
+      if (isset($_POST['simpan'])) {
+          $merk = $_POST['merk'];
+          $pengunjung_id = $_POST['pengunjung_id'];
+          $nopol = $_POST['nopol'];
+          $thn_beli = $_POST['thn_beli'];
+          $deskripsi = $_POST['deskripsi'];
+          $jenis_id = $_POST['jenis_id'];
+
+          // Tambahkan bagian insert ke database
+          $query = "INSERT INTO kendaraan (merk, pengunjung_id, nopol, thn_beli, deskripsi, jenis_id) 
+                    VALUES ('$merk', '$pengunjung_id', '$nopol', '$thn_beli', '$deskripsi', '$jenis_id')";
+          
+          if ($koneksi->query($query) === TRUE) {
+              echo "<script>location='index.php';</script>";
+          } else {
+              echo "<div class='alert alert-danger'>Gagal menyimpan data: " . $koneksi->error . "</div>";
+          }
+      }
+
+    ?>
+
     <form method="post">
       <div class="mb-3">
         <label class="form-label">Merk</label>
@@ -93,11 +109,10 @@
       </div>
       
       <div class="mb-3">
-        <label class="form-label">Pemilik</label>
-        <select name="pemilik_id" class="form-select" required>
-          <option value="">-- Pilih Pemilik --</option>
+        <label class="form-label">Pemilik (Pengunjung)</label>
+        <select name="pengunjung_id" class="form-select" required>
+          <option value="">-- Pilih Pengunjung --</option>
           <?php
-          // Menampilkan daftar pengunjung dari database
           $pengunjung = $koneksi->query("SELECT * FROM pengunjung");
           while ($p = $pengunjung->fetch_assoc()) {
               echo "<option value='{$p['id']}'>{$p['nama']}</option>";
@@ -120,7 +135,7 @@
       </div>
       <div class="mb-3">
         <label class="form-label">Jenis Kendaraan</label>
-        <select name="jenis_kendaraan_id" class="form-select" required>
+        <select name="jenis_id" class="form-select" required>
           <option value="">-- Pilih Jenis --</option>
           <?php
           $jenis = $koneksi->query("SELECT * FROM jenis");
@@ -130,25 +145,9 @@
           ?>
         </select>
       </div>
-      <button class="btn btn-primary" name="simpan"><i class="fas fa-plus me-2"></i>Simpan</button>
+      <button class="btn btn-success" name="simpan"><i class="fas fa-save me-2"></i>Simpan</button>
       <a href="index.php" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Kembali</a>
     </form>
-
-    <?php
-    if (isset($_POST['simpan'])) {
-        $merk = $_POST['merk'];
-        $pemilik_id = $_POST['pemilik_id']; // Menggunakan ID pengunjung
-        $nopol = $_POST['nopol'];
-        $thn_beli = $_POST['thn_beli'];
-        $deskripsi = $_POST['deskripsi'];
-        $jenis_kendaraan_id = $_POST['jenis_kendaraan_id'];
-
-        // Menyimpan data kendaraan dengan mengaitkan pemiliknya melalui ID
-        $koneksi->query("INSERT INTO kendaraan (merk, pemilik_id, nopol, thn_beli, deskripsi, jenis_kendaraan_id) 
-                         VALUES ('$merk', '$pemilik_id', '$nopol', '$thn_beli', '$deskripsi', '$jenis_kendaraan_id')");
-        echo "<script>location='index.php';</script>";
-    }
-    ?>
   </div>
 </div>
 
